@@ -1,17 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import background from "../assets/backgroung.png"; 
+import background from "../assets/backgroung.png";
+
 export default function AgentControl() {
     const { serviceName, agencyLocation } = useParams(); // Récupère les paramètres de l'URL
     const [agencyData, setAgencyData] = useState(null); // État pour stocker les données de l'API
     const [loading, setLoading] = useState(true); // État pour gérer le chargement
     const [error, setError] = useState(null); // État pour gérer les erreurs
 
-    // Récupère les données de l'API
-    useEffect(() => {
-        fetchData();
-    }, [serviceName, agencyLocation]); // Déclenche l'effet lorsque les paramètres changent
-
+    // Fonction pour récupérer les données de l'API
     const fetchData = async () => {
         try {
             const response = await fetch(`/api/agent/${serviceName}/${agencyLocation}`);
@@ -27,6 +24,18 @@ export default function AgentControl() {
             setLoading(false); // Désactive le chargement
         }
     };
+
+    // Récupère les données de l'API au montage du composant et à intervalles réguliers
+    useEffect(() => {
+        // Appel initial des données
+        fetchData();
+
+        // Configurer un intervalle pour rafraîchir les données toutes les 5 secondes
+        const intervalId = setInterval(fetchData, 5000);
+
+        // Nettoyer l'intervalle lorsque le composant est démonté
+        return () => clearInterval(intervalId);
+    }, [serviceName, agencyLocation]); // Déclenche l'effet lorsque les paramètres changent
 
     // Fonction pour passer au client suivant
     const handleNextClient = async () => {
@@ -108,7 +117,7 @@ export default function AgentControl() {
                             Dernier numéro de ticket attribué :
                         </p>
                         <p className="text-2xl font-bold text-purple-600">
-                            {agencyData.lastTicketNumber}
+                            {agencyData.lastTicketNumber - 1}
                         </p>
                     </div>
 
@@ -117,7 +126,7 @@ export default function AgentControl() {
                             Taille de la file d'attente :
                         </p>
                         <p className="text-2xl font-bold text-purple-600">
-                            {queueSize}
+                            {queueSize - 1}
                         </p>
                     </div>
 

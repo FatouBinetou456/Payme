@@ -8,23 +8,31 @@ export default function ClientCard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch(`/api/agency/${serviceName}/${agencyLocation}`);
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const data = await response.json();
-                setAgencyData(data);
-            } catch (error) {
-                setError(error.message);
-            } finally {
-                setLoading(false);
+   
+    const fetchData = async () => {
+        try {
+            const response = await fetch(`/api/agency/${serviceName}/${agencyLocation}`);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
             }
-        };
+            const data = await response.json();
+            setAgencyData(data);
+        } catch (error) {
+            setError(error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
+        // Appel initial des données
         fetchData();
+
+        // Mise à jour régulière des données toutes les 5 secondes
+        const intervalId = setInterval(fetchData, 5000);
+
+        // Nettoyage de l'intervalle lorsque le composant est démonté
+        return () => clearInterval(intervalId);
     }, [serviceName, agencyLocation]);
 
     if (loading) {

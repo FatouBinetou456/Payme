@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import AgencyCard from "./AgencyCard";
 import background from "../assets/backgroung.png"
 
 export default function BusinessAgencies() {
   const { serviceName } = useParams();
+  const navigate = useNavigate();
   const [agencies, setAgencies] = useState([]);
 
   useEffect(() => {
@@ -23,6 +24,20 @@ export default function BusinessAgencies() {
       .catch((error) => console.error("Error fetching data:", error));
   }, [serviceName]);
 
+  const handleAgencyClick = (agency) => {
+    // Issue a new ticket for the selected agency
+    fetch(`/api/agency/${agency.serviceName}/${agency.location}/issue`, {
+      method: "POST",
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Ticket issued:", data);
+        // Redirect to the agencies page after issuing the ticket
+        navigate(`/${agency.serviceName}/${agency.location}`);
+      })
+      .catch((error) => console.error("Error issuing ticket:", error));
+  };
+
   return (
     <div className="p-8
     "
@@ -39,6 +54,7 @@ export default function BusinessAgencies() {
           <AgencyCard
             key={agency.agencyId} // Use agencyId as the key
             agency={agency} // Pass the entire agency object
+            onClick={handleAgencyClick}
           />
         ))
       ) : (
